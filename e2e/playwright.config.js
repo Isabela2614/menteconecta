@@ -8,6 +8,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './global-setup.js',
   // Un solo worker: las pruebas comparten la misma base de datos y el mismo límite de intentos.
   fullyParallel: false,
   workers: 1,
