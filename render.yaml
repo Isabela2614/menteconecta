@@ -1,0 +1,64 @@
+# Despliegue de MenteConecta en Render (Blueprint).
+# Render > New > Blueprint > elige este repositorio.
+# Las variables con "sync: false" se escriben en el panel de Render: NUNCA en este archivo.
+services:
+  # ---------- API (Express) ----------
+  - type: web
+    name: menteconecta-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Base de datos: Azure SQL con autenticación SQL (no Windows).
+      - key: DB_WINDOWS_AUTH
+        value: "false"
+      - key: DB_SERVER
+        sync: false # ej. tu-servidor.database.windows.net
+      - key: DB_PORT
+        value: "1433"
+      - key: DB_NAME
+        value: MenteConecta
+      - key: DB_USER
+        sync: false # usuario de la app (menteconecta_app), no el administrador
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_ENCRYPT
+        value: "true"
+      - key: DB_TRUST_SERVER_CERT
+        value: "false" # Azure tiene certificado válido: se verifica
+      # Seguridad
+      - key: JWT_SECRET
+        generateValue: true # Render genera un secreto nuevo y aleatorio
+      - key: JWT_EXPIRES_IN
+        value: 2h
+      - key: BCRYPT_COST
+        value: "12"
+      - key: AUTH_RATE_LIMIT_MAX
+        value: "20"
+      - key: TRUST_PROXY
+        value: "1"
+      # URL exacta del frontend en Render, sin "/" final (ej. https://menteconecta-web.onrender.com)
+      - key: CORS_ORIGIN
+        sync: false
+      # Chat simulado: no envía datos a Google.
+      - key: GEMINI_MODE
+        value: demo
+
+  # ---------- Frontend (React + Vite, sitio estático) ----------
+  - type: web
+    name: menteconecta-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # URL de la API en Render, terminada en /api (ej. https://menteconecta-api.onrender.com/api)
+      - key: VITE_API_URL
+        sync: false

@@ -61,7 +61,10 @@ export function loadConfig() {
       expiresIn: env.JWT_EXPIRES_IN || '2h'
     },
     bcryptCost,
-    authRateLimitMax: toInt(env.AUTH_RATE_LIMIT_MAX, 20)
+    authRateLimitMax: toInt(env.AUTH_RATE_LIMIT_MAX, 20),
+    // Número de proxies delante del backend (Render = 1). 0 en local: así nadie puede
+    // falsificar su IP con X-Forwarded-For para saltarse el límite de intentos.
+    trustProxy: toInt(env.TRUST_PROXY, 0)
     ,gemini: { mode: env.GEMINI_MODE === 'live' ? 'live' : 'demo', apiKey: env.GEMINI_API_KEY || '', model: env.GEMINI_MODEL || 'gemini-3.8-flash' }
   };
 }

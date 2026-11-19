@@ -17,6 +17,9 @@ export function createApp({ authService, consentService, emotionService, library
   const app = express();
 
   app.disable('x-powered-by');
+  // Detrás del proxy de Render, sin esto todas las peticiones tendrían la misma IP
+  // y el límite de intentos de /api/auth sería compartido por todos los usuarios.
+  if (config.trustProxy) app.set('trust proxy', config.trustProxy);
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigin, methods: ['GET', 'POST', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
   app.use(express.json({ limit: '10kb' }));
